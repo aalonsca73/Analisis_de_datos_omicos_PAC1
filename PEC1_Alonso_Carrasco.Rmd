@@ -22,4 +22,4 @@ Particularmente, el archivo `S04_Bac03_read1.fastq` contiene 250000 secuencias.
 
 FALTA COMPLETAR
 
-# 
+# 3. Control de calidad con `Galaxy`
