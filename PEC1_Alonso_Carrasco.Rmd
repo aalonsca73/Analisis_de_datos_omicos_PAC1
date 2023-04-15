@@ -49,5 +49,22 @@ knitr::include_graphics("galaxy_base_sequence_content.png")
 
 # Control de calidad con `Bioconductor`
 
+Para hacer el control de calidad con `Bioconductor`, lo primero que debemos hacer es seguir las [instrucciones de instalación](https://www.bioconductor.org/install/) de la página principal. A continuación, debemos instalar y cargar el paquete `Rqc` usando los comandos `install.packages("Rqc")` y `library(Rqc)`, respectivamente. Finalmente, para realizar el análisis debemos usar el comando `rqc()` especificando la carpeta donde se encuentran los datos y el formato de los ficheros que queremos analizar. Esto generará un archivo `.htlm` con un análisis completo de los archivos indicados.
 
+```{r average-quality, echo=FALSE, out.height="25%", fig.cap="Average Quality",fig.align='center'}
+knitr::include_graphics("Rqc_average_quality.png")
+```
 
+El primer gráfico que vamos a analizar del informe del control de calidad del fichero `S04_Bac03_read1.fastq` tiene por título *Average Quality* y se puede ver en la Figura \@ref(fig:average-quality). Este gráfico expone el patrón de calidad media mostrando en el eje `x` los umbrales de calidad y en el eje `y` el porcentaje de lecturas que superan ese nivel de calidad. Por tanto, podemos ver que casi el 100% de las lecturas superan el umbral de calidad de 30 (Q30). Cuando la calidad de las secuencias llega a Q30, virtualmente todas las lecturas serán perfectas, sin errores o ambigüedades. Es por esto que Q30 se considera el valor de referencia para la calidad en la secuenciación de siguiente generación (NGS). Así pues, podemos asegurar que nuestros datos tienen una muy buena calidad media.
+
+```{r average-quality-rqc, echo=FALSE, out.height="25%", fig.cap="Cycle-specific Average Quality",fig.align='center'}
+knitr::include_graphics("Rqc_cyclic_average_quality.png")
+```
+
+No obstante, el paquete `Rqc` también nos proporciona un gráfico en el que podemos ver las puntuaciones de calidad medias para cada ciclo de secuenciación. En este caso tenemos la calidad media en el eje `y` y el número del ciclo en el eje `x` (Figura \@ref(fig:average-quality-rqc)). Como podemos observar, los 5 primeros ciclos tienen una calidad media en torno a Q32, que es algo más baja que el Q38 que encontramos en el resto de ciclos. Excepcionalmente, en los ciclos 37 y 38, no obstante, observamos otra pequeña pérdida de calidad que se sitúa en torno a Q34. De todas formas, dado que, como hemos comentado antes, la calidad media de todas las secuencias es superior a Q30, podemos afirmar que en todos los ciclos la calidad de las secuencias es excepcionalmente elevada. 
+
+Con respecto al ciclo de secuenciación también podemos obtener la media del contenido de GC (Figura \@ref(fig:gc-content))
+
+```{r gc-content, echo=FALSE, out.height="25%", fig.cap="Cycle-specific GC Content",fig.align='center'}
+knitr::include_graphics("Rqc_GC_content.png")
+```
