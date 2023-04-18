@@ -3,7 +3,8 @@ title: "Análisis de datos ómicos - Primera prueba de evaluación continua"
 author: "Aràntzazu Alonso Carrasco"
 date: '`r format(Sys.Date(),"%e de %B, %Y")`'
 output: 
-  bookdown::pdf_document2
+  bookdown::pdf_document2:
+    toc: false
 lang: es
 ---
 
@@ -19,7 +20,7 @@ Primero, debemos descargar el archivo *fastq* con el que trabajaremos a lo largo
 
 Una vez descargados los datos, podemos proceder a describirlos. El formato del archivo es .fastq, que es un formato ampliamente utilizado en bioinformática para representar datos de secuenciación de ADN o ARN en bruto. Concretamente, los archivos en formato .fastq contienen secuencias de nucleótidos junto con información de calidad asociada a cada nucleótido de la secuencia. Los archivos .fastq son muy utilizados en la secuenciación de nueva generación (NGS) para representar datos de secuenciación de alta calidad generados por tecnologías como Illumina. 
 
-Particularmente, el archivo `S04_Bac03_read1.fastq` contiene 250000 secuencias obtenidas a partir del trascriptoma completo de *Pseudomonas aeruginosa*. Se trata de muestras de RNA-seq que son *paired-end*. Sabiendo esto, podemos pasar a hacer un control de calidad del archivo con diferentes herramientas. Para este informe usaremos las herramientas `Galxay` y el paquete `Rqc` de `Bioconductor`.
+Particularmente, el archivo `S04_Bac03_read1.fastq` contiene 250000 secuencias obtenidas a partir del trascriptoma completo de *Pseudomonas aeruginosa*. Se trata de muestras de RNA-seq que son *paired-end*. Sabiendo esto, podemos pasar a hacer un control de calidad del archivo con diferentes herramientas. Para este informe usaremos las herramientas `Galaxy` y el paquete `Rqc` de `Bioconductor`.
 
 # Control de calidad con `Galaxy`
 
@@ -33,19 +34,19 @@ Una vez hemos desplegado el análisis de los resultados, lo primero que vemos es
 
 Como podemos ver en la Figura \@ref(fig:base-quality), todas las secuencias tienen una calidad muy buena, ya que se sitúan principalmente en la región verde. Sin embargo, podemos destacar que en la posición 37-39 del *read* hay una pequeña pérdida de calidad, ya que el bigote inferior del diagrama de cajas entra dentro de la región roja, que indica una baja calidad.
 
-```{r quality-score, echo=FALSE, out.height="25%", fig.cap="Per sequence quality score",fig.align='center'}
-knitr::include_graphics("galaxy_sequence_quality_scores.png")
-```
-
 De todas formas, tal como podemos ver en la Figura \@ref(fig:quality-score), en la que se representa la puntuación de la calidad de cada una de las secuencias analizadas, la mayor parte de las secuencias tienen una calidad muy elevada, ya que se sitúan en un *Phred score* de 37. El *Phred score* es una medida de la calidad de la secuencia en la secuenciación de ADN y es una escala logarítmica que mide la probabilidad de que la base sea errónea. Cuando mayor sea el *Phred score*, mayor probabilidad de que la base sea correcta. Por ejemplo, un *Phred score* de 30 indica que la probabilidad de que la base sea incorrecta es de 1 en 1000, mientras que un *Phred score* de 40 indica que la probabilidad de que la base sea incorrecta es de 1 en 10000. Dado que el *Phred score* de la mayoría de secuencias es de 37, podemos afirmar que la probabilidad de que sean incorrectas es muy baja, es decir, la calidad es muy elevada. 
 
-```{r base-sequence-content, echo=FALSE, out.height="25%", fig.cap="Per base sequence content",fig.align='center'}
-knitr::include_graphics("galaxy_base_sequence_content.png")
+```{r quality-score, echo=FALSE, out.height="25%", fig.cap="Per sequence quality score",fig.align='center'}
+knitr::include_graphics("galaxy_sequence_quality_scores.png")
 ```
 
 Finalmente, podemos analizar el contenido de cada base nitrogenada en la secuencia. En general, esperamos encontrar poca o ninguna diferencia entre las diferentes bases de una *run*, de manera que las líneas del gráfico deben ser relativamente paralelas entre sí. De hecho, la cantidad relativa de cada base debería reflejar la cantidad total de las bases del genoma, así que no deberíamos encontrar grandes desbalances entre ellas. Si vemos una tendencia considerable hacia una de las bases en particular, suele ocurrir por sobrerrepresentación de una secuencia que está contaminando la librería entera. 
 
 Volviendo al caso concreto de nuestros datos, en la Figura \@ref(fig:base-sequence-content), que el informe FastQC nos indica con un error, podemos ver que no obtenemos líneas paralelas entre las bases, si no que hay grandes desviaciones entre ellas. Por tanto, puede ser que haya secuencias contaminando los datos o que la fragmentación del ARN se haya producido de forma sesgada. 
+
+```{r base-sequence-content, echo=FALSE, out.height="25%", fig.cap="Per base sequence content",fig.align='center'}
+knitr::include_graphics("galaxy_base_sequence_content.png")
+```
 
 # Control de calidad con `Bioconductor`
 
@@ -71,7 +72,7 @@ knitr::include_graphics("Rqc_GC_content.png")
 
 Otro gráfico que podemos analizar es del de la Figura \@ref(fig:rqc-quality-distribution). Como vemos, es análogo al de la Figura \@ref(fig:base-quality). Así pues, la interpretación también es la misma. Podemos ver que todas las secuencias tienen una puntuación mayor a Q30, hecho que indica la gran calidad de las secuencias. Sin embargo, volvemos a ver que en los ciclos 37 y 38 algunas secuencias tienen una calidad muy inferior a la del conjunto; probablemente se trata de alguna secuencia *outlier*. 
 
-```{r rqc-quality-distribution, echo=FALSE, out.height="25%", fig.cap="Cycle-specific Quality Distribution - Boxplot",fig.align='center'}
+```{r rqc-quality-distribution, echo=FALSE, out.height="20%", fig.cap="Cycle-specific Quality Distribution - Boxplot",fig.align='center'}
 knitr::include_graphics("Rqc_quality_distribution_boxplot.png")
 ```
 
