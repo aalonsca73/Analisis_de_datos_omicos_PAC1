@@ -33,19 +33,19 @@ Una vez hemos desplegado el análisis de los resultados, lo primero que vemos es
 
 Como podemos ver en la Figura \@ref(fig:base-quality), todas las secuencias tienen una calidad muy buena, ya que se sitúan principalmente en la región verde. Sin embargo, podemos destacar que en la posición 37-39 del *read* hay una pequeña pérdida de calidad, ya que el bigote inferior del diagrama de cajas entra dentro de la región roja, que indica una baja calidad.
 
-De todas formas, tal como podemos ver en la Figura \@ref(fig:quality-score), en la que se representa la puntuación de la calidad de cada una de las secuencias analizadas, la mayor parte de las secuencias tienen una calidad muy elevada, ya que se sitúan en el pico superior izquierdo de la figura.  
-
 ```{r quality-score, echo=FALSE, out.height="25%", fig.cap="Per sequence quality score",fig.align='center'}
 knitr::include_graphics("galaxy_sequence_quality_scores.png")
 ```
 
-Finalmente, podemos analizar el contenido de cada base nitrogenada en la secuencia. En general, esperamos encontrar poca o ninguna diferencia entre las diferentes bases de una *run*, de manera que las líneas del gráfico deben ser relativamente paralelas entre sí. De hecho, la cantidad relativa de cada base debería reflejar la cantidad total de las bases del genoma, así que no deberíamos encontrar grandes desbalances entre ellas. Si vemos una tendencia considerable hacia una de las bases en particular, suele ocurrir por sobrerrepresentación de una secuencia que está contaminando la librería entera. 
-
-Volviendo al caso concreto de nuestros datos, en la Figura \@ref(fig:base-sequence-content) podemos ver que no hay grandes desviaciones ni tendencias a favor de alguna de las bases en particular. Por tanto, parece que no hay ninguna secuencia contaminando los datos. 
+De todas formas, tal como podemos ver en la Figura \@ref(fig:quality-score), en la que se representa la puntuación de la calidad de cada una de las secuencias analizadas, la mayor parte de las secuencias tienen una calidad muy elevada, ya que se sitúan en un *Phred score* de 37. El *Phred score* es una medida de la calidad de la secuencia en la secuenciación de ADN y es una escala logarítmica que mide la probabilidad de que la base sea errónea. Cuando mayor sea el *Phred score*, mayor probabilidad de que la base sea correcta. Por ejemplo, un *Phred score* de 30 indica que la probabilidad de que la base sea incorrecta es de 1 en 1000, mientras que un *Phred score* de 40 indica que la probabilidad de que la base sea incorrecta es de 1 en 10000. Dado que el *Phred score* de la mayoría de secuencias es de 37, podemos afirmar que la probabilidad de que sean incorrectas es muy baja, es decir, la calidad es muy elevada. 
 
 ```{r base-sequence-content, echo=FALSE, out.height="25%", fig.cap="Per base sequence content",fig.align='center'}
 knitr::include_graphics("galaxy_base_sequence_content.png")
 ```
+
+Finalmente, podemos analizar el contenido de cada base nitrogenada en la secuencia. En general, esperamos encontrar poca o ninguna diferencia entre las diferentes bases de una *run*, de manera que las líneas del gráfico deben ser relativamente paralelas entre sí. De hecho, la cantidad relativa de cada base debería reflejar la cantidad total de las bases del genoma, así que no deberíamos encontrar grandes desbalances entre ellas. Si vemos una tendencia considerable hacia una de las bases en particular, suele ocurrir por sobrerrepresentación de una secuencia que está contaminando la librería entera. 
+
+Volviendo al caso concreto de nuestros datos, en la Figura \@ref(fig:base-sequence-content), que el informe FastQC nos indica con un error, podemos ver que no obtenemos líneas paralelas entre las bases, si no que hay grandes desviaciones entre ellas. Por tanto, puede ser que haya secuencias contaminando los datos o que la fragmentación del ARN se haya producido de forma sesgada. 
 
 # Control de calidad con `Bioconductor`
 
@@ -57,14 +57,32 @@ knitr::include_graphics("Rqc_average_quality.png")
 
 El primer gráfico que vamos a analizar del informe del control de calidad del fichero `S04_Bac03_read1.fastq` tiene por título *Average Quality* y se puede ver en la Figura \@ref(fig:average-quality). Este gráfico expone el patrón de calidad media mostrando en el eje `x` los umbrales de calidad y en el eje `y` el porcentaje de lecturas que superan ese nivel de calidad. Por tanto, podemos ver que casi el 100% de las lecturas superan el umbral de calidad de 30 (Q30). Cuando la calidad de las secuencias llega a Q30, virtualmente todas las lecturas serán perfectas, sin errores o ambigüedades. Es por esto que Q30 se considera el valor de referencia para la calidad en la secuenciación de siguiente generación (NGS). Así pues, podemos asegurar que nuestros datos tienen una muy buena calidad media.
 
+No obstante, el paquete `Rqc` también nos proporciona un gráfico en el que podemos ver las puntuaciones de calidad medias para cada ciclo de secuenciación. En este caso tenemos la calidad media en el eje `y` y el número del ciclo en el eje `x` (Figura \@ref(fig:average-quality-rqc)). Como podemos observar, los 5 primeros ciclos tienen una calidad media en torno a Q32, que es algo más baja que el Q38 que encontramos en el resto de ciclos. Excepcionalmente, en los ciclos 37 y 38, no obstante, observamos otra pequeña pérdida de calidad que se sitúa en torno a Q34. De todas formas, dado que, como hemos comentado antes, la calidad media de todas las secuencias es superior a Q30, podemos afirmar que en todos los ciclos la calidad de las secuencias es excepcionalmente elevada. 
+
 ```{r average-quality-rqc, echo=FALSE, out.height="25%", fig.cap="Cycle-specific Average Quality",fig.align='center'}
 knitr::include_graphics("Rqc_cyclic_average_quality.png")
 ```
 
-No obstante, el paquete `Rqc` también nos proporciona un gráfico en el que podemos ver las puntuaciones de calidad medias para cada ciclo de secuenciación. En este caso tenemos la calidad media en el eje `y` y el número del ciclo en el eje `x` (Figura \@ref(fig:average-quality-rqc)). Como podemos observar, los 5 primeros ciclos tienen una calidad media en torno a Q32, que es algo más baja que el Q38 que encontramos en el resto de ciclos. Excepcionalmente, en los ciclos 37 y 38, no obstante, observamos otra pequeña pérdida de calidad que se sitúa en torno a Q34. De todas formas, dado que, como hemos comentado antes, la calidad media de todas las secuencias es superior a Q30, podemos afirmar que en todos los ciclos la calidad de las secuencias es excepcionalmente elevada. 
+Con respecto al ciclo de secuenciación también podemos obtener el porcentaje del contenido de GC (Figura \@ref(fig:gc-content)). *A priori* esperamos que el contenido de GC sea uniforme a lo largo de los ciclos. No obstante, vemos que en nuestros datos hay una gran variabilidad de este porcentaje en función del ciclo, hecho que puede estar indicando sesgos en la secuenciación del ARN. Por tanto, sería conveniente volver a secuenciar los datos realizando los ajustes necesarios del protocolo de secuenciación.
 
-Con respecto al ciclo de secuenciación también podemos obtener la media del contenido de GC (Figura \@ref(fig:gc-content))
-
-```{r gc-content, echo=FALSE, out.height="25%", fig.cap="Cycle-specific GC Content",fig.align='center'}
+```{r gc-content, echo=FALSE, out.height="25%", fig.cap="Cycle-specific GC Content",fig.align='center',}
 knitr::include_graphics("Rqc_GC_content.png")
 ```
+
+Otro gráfico que podemos analizar es del de la Figura \@ref(fig:rqc-quality-distribution). Como vemos, es análogo al de la Figura \@ref(fig:base-quality). Así pues, la interpretación también es la misma. Podemos ver que todas las secuencias tienen una puntuación mayor a Q30, hecho que indica la gran calidad de las secuencias. Sin embargo, volvemos a ver que en los ciclos 37 y 38 algunas secuencias tienen una calidad muy inferior a la del conjunto; probablemente se trata de alguna secuencia *outlier*. 
+
+```{r rqc-quality-distribution, echo=FALSE, out.height="25%", fig.cap="Cycle-specific Quality Distribution - Boxplot",fig.align='center'}
+knitr::include_graphics("Rqc_quality_distribution_boxplot.png")
+```
+
+Finalmente, podemos ver, tal como veíamos en la Figura \@ref(fig:base-sequence-content), que usando `Bioconductor` obtenemos un gráfico muy similar (Figura \@ref(fig:rqc-basecall)). La gran dispersión entre las bases nitrogenadas nos hace sospechar que hay secuencias contaminando la muestra o que la fragmentación del ARN no se ha producido correctamente. 
+
+```{r rqc-basecall, echo=FALSE, out.height="25%", fig.cap="Cycle-specific Base Call Proportion",fig.align='center'}
+knitr::include_graphics("Rqc_basecall_proportion.png")
+```
+
+# Conclusiones
+
+Una vez hecho el control de calidad de las secuencias usando las dos herramientas, `Galaxy` y `Bioconductor`, podemos compararlas entre sí. Como hemos visto en las Figuras \@ref(fig:rqc-quality-distribution) y \@ref(fig:base-quality), así como en las Figuras \@ref(fig:base-sequence-content) y \@ref(fig:rqc-basecall), ambas herramientas nos permiten sacar las mismas conclusiones respecto a las muestras. En este caso, hemos visto que la secuenciación es de elevada calidad, dado que obtenemos puntuaciones superiores a Q30, pero hay contaminaciones o algún error en el tratamiento de las muestras, pues el contenido de GC y de bases nitrogenadas es muy dispar entre los diferentes ciclos. De hecho, los informes obtenidos con ambas herramientas contienen prácticamente los mismos gráficos y la misma información. Por tanto, ambas herramientas son igual de válidas para el análisis de resultados. 
+
+No obstante, es cierto que `Galaxy` da ciertas pistas de cómo interpretar los resultados, pues aparece un círculo verde con un tick en aquellos gráficos que muestran que la secuenciación se ha realizado con éxito, mientras que aparece un círculo rojo con una cruz en aquellos gráficos que muestran algún problema en la secuenciación. Es por esto que los resultados son más sencillos de interpretar. Podemos decir que `Galaxy` ofrece una cierta guía para aquellas personas que no somos expertas en este campo, mientras que `Bioconductor` deja en manos del investigador la interpretación del resultado.  
